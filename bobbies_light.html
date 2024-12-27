@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bobby's Dungeon</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      background: black;
+      color: white;
+    }
+
+    canvas {
+      display: block;
+      margin: 0 auto;
+      background: url('https://i.postimg.cc/wvpgT3tD/dungeon-background.jpg') no-repeat center center;
+      background-size: cover;
+    }
+
+    #info {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 16px;
+      color: white;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    #timer {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 18px;
+    }
+
+    .heart {
+      width: 20px;
+      height: 20px;
+      background: red;
+      clip-path: polygon(50% 0%, 100% 40%, 80% 100%, 50% 75%, 20% 100%, 0% 40%);
+      margin-right: 5px;
+    }
+
+    #healthBar {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    #lifeMeter {
+      height: 20px;
+      width: 200px;
+      background: #333;
+      border: 1px solid white;
+      position: relative;
+    }
+
+    .meterFill {
+      height: 100%;
+      background: limegreen;
+    }
+  </style>
+</head>
+<body>
+<div id="info">
+  <p>Lives: <span id="lives">3</span></p>
+  <p>Score: <span id="score">0</span></p>
+  <div id="healthBar">
+    <div class="heart"></div>
+    <div id="lifeMeter">
+      <div class="meterFill" id="lifeFill"></div>
+    </div>
+  </div>
+</div>
+<div id="timer">99:99</div>
+<canvas id="gameCanvas"></canvas>
+
+<script>
+  const canvas = document.getElementById("gameCanvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = 800;
+  canvas.height = 600;
+
+  // Game state
+  const player = {
+    x: 100,
+    y: canvas.height - 100,
+    width: 30,
+    height: 50,
+    speed: 5,
+    lives: 3,
+    health: 1, // Health is a percentage (1.0 = full, 0 = empty)
+    score: 0,
+    enemiesDestroyed: 0,
+    extraLifeThreshold: 50, // First extra life after 50 kills
+    isJumping: false,
+    jumpsRemaining: 2,
+    velocityY: 0,
+    flashlightRadius: 150,
+    jetpackTime: 0,
+    jetpackActive: false,
+  };
+
+  let keys = {};
+  let bullets = [];
+  let platforms = [];
+  let enemies = [];
+  let lastPlatformX = 0;
+  let timer = 15 * 60 * 60; // 15 minutes in frames (60fps)
+
+  const gravity = 0.5;
+  const maxJetpackTime = 2.5 * 60; // 2.5 seconds in frames
+  const maxLives = 3;
+
+  // Camera settings
+  let cameraOffsetX = 0;
+
+  // Lava animation
+  let lavaOffset = 0;
+
+  // Generate initial platforms
+  function createInitialPlatforms() {
+    platforms = [];
+    for (let i = 0; i < 5; i++) {
+      const platform = {
+        x: i * 200,
+        y: canvas.height - 50 - Math.random() * 100,
+        width: 200,
+        height: 20,
+        active: true,
+      };
+      platforms.push(platform);
+      lastPlatformX = platform.x + platform.width;
+    }
+
+    // Place the player on the first platform
+    player.y = platforms[0].y - player.height;
+  }
+
+  // Generate new platforms as you move forward
+  function generatePlatforms() {
+    while (lastPlatformX < cameraOffsetX + canvas.width + 200) {
+      const platform = {
+        x: lastPlatformX + Math.random() * 100 + 50,
+        y: canvas.height - 50 - Math.random() * 300,
+        width: 100 + Math.random() * 150,
+        height: 20,
+        active: true,
+      };
+      platforms.push(platform);
+      lastPlatformX = platform.x + platform.width;
+
+      // Add multiple enemies to platforms
+      for (let i = 0; i < Math.floor(Math.random() * 3 + 1); i++) {
+        enemies.push({
+          x: platform.x + Math.random() * platform.width,
+          y: platform.y - 20 - Math.random() * 100,
+          width: 20,
+          height: 20,
+          speed: Math.random() * 2 + 1,
+          frozen: false,
+          frozenHits: 0,
+          movingRight: Math.random() > 0.5,
+        });
+      }
+    }
+  }
+
+  // Reset player position
+  function resetPlayer() {
+    player.x = cameraOffsetX + 100;
+    player.y = platforms[0].y - player.height;
+    player.isJumping = false;
+    player.jumpsRemaining = 2;
+    player.velocityY = 0;
+    player.jetpackTime = 0;
+    player.jetpackActive = false;
+  }
+
+  // Shoot bullets
+  function shoot() {
+    bullets.push({
+      x: player.x + player.width / 2,
+      y: player.y,
+      width: 5,
+      height: 5,
+      speed: 7,
+    });
+  }
+
+  // Handle collisions
+  function checkCollisions() {
+    platforms.forEach((platform) => {
+      if (!platform.active) return;
+
+      if (
+        player.x < platform.x + platform.width &&
+        player.x + player.width > platform.x &&
+        player.y + player.height >= platform.y &&
+        player.y + player.height <= platform.y + platform.height
+      ) {
+        player.y = platform.y - player.height;
+        player.isJumping = false;
+        player.jumpsRemaining = 2;
+        player.jetpackActive = false;
+        player.velocityY = 0;
+      }
+    });
+
+    bullets.forEach((bullet, bulletIndex) => {
+      enemies.forEach((enemy, enemyIndex) => {
+        if (
+          bullet.x < enemy.x + enemy.width &&
+          bullet.x + bullet.width > enemy.x &&
+          bullet.y < enemy.y + enemy.height &&
+          bullet.y + bullet.height > enemy.y
+        ) {
+          bullets.splice(bulletIndex, 1);
+
+          if (!enemy.frozen) {
+            enemy.frozen = true; // Freeze enemy
+            enemy.speed = 0;
+          } else {
+            // Destroy enemy on second hit
+            enemies.splice(enemyIndex, 1);
+            player.score += 100;
+            player.enemiesDestroyed++;
+
+            // Check for extra lives
+            if (player.enemiesDestroyed >= player.extraLifeThreshold) {
+              player.lives++;
+              player.extraLifeThreshold += 100; // Next extra life after 100 more kills
+            }
+
+            updateMeters();
+          }
+        }
+      });
+    });
+
+    enemies.forEach((enemy, index) => {
+      if (enemy.movingRight) {
+        enemy.x += enemy.speed;
+        if (enemy.x + enemy.width > cameraOffsetX + canvas.width) enemy.movingRight = false;
+      } else {
+        enemy.x -= enemy.speed;
+        if (enemy.x < cameraOffsetX) enemy.movingRight = true;
+      }
+
+      // Bobby can only touch frozen enemies
+      if (
+        !enemy.frozen &&
+        player.x < enemy.x + enemy.width &&
+        player.x + player.width > enemy.x &&
+        player.y + player.height > enemy.y &&
+        player.y < enemy.y + enemy.height
+      ) {
+        player.health -= 1 / 3; // Lose 1/3 of health
+        if (player.health <= 0) {
+          player.health = 1; // Reset health bar
+          player.lives--; // Lose a life
+        }
+
+        updateMeters();
+
+        if (player.lives <= 0) {
+          alert("Game Over! Score: " + player.score);
+          document.location.reload();
+        }
+        resetPlayer();
+      }
+    });
+
+    if (player.y > canvas.height) {
+      player.lives--;
+      updateMeters();
+      if (player.lives <= 0) {
+        alert("Game Over! Score: " + player.score);
+        document.location.reload();
+      }
+      resetPlayer();
+    }
+  }
+
+  // Update game state
+  function updateGameState() {
+    if (player.jetpackActive && player.jetpackTime > 0) {
+      player.velocityY = -3;
+      player.jetpackTime--;
+    } else if (player.jetpackActive && player.jetpackTime <= 0) {
+      player.jetpackActive = false;
+    }
+
+    player.velocityY += gravity;
+    player.y += player.velocityY;
+
+    if (player.x > cameraOffsetX + canvas.width / 2) {
+      cameraOffsetX = player.x - canvas.width / 2;
+    }
+
+    bullets.forEach((bullet, index) => {
+      bullet.x += bullet.speed;
+      if (bullet.x > cameraOffsetX + canvas.width) {
+        bullets.splice(index, 1);
+      }
+    });
+
+    timer--;
+    if (timer <= 0) {
+      alert("Time's up! Game Over!");
+      document.location.reload();
+    }
+
+    lavaOffset += 2; // Lava animation
+    if (lavaOffset > canvas.width) lavaOffset = 0;
+
+    generatePlatforms();
+  }
+
+  // Draw game objects
+  function drawGame() {
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Lava with animation
+    ctx.fillStyle = "red";
+    for (let i = -1; i < canvas.width / 40; i++) {
+      ctx.beginPath();
+      ctx.arc(
+        (i * 40 + lavaOffset) % canvas.width,
+        canvas.height - 15,
+        20,
+        0,
+        Math.PI,
+        true
+      );
+      ctx.fill();
+    }
+
+    // Flashlight effect
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(
+      player.x - cameraOffsetX + player.width / 2,
+      player.y + player.height / 2,
+      player.flashlightRadius,
+      0,
+      Math.PI * 2
+    );
+    ctx.clip();
+
+    // Platforms
+    platforms.forEach((platform) => {
+      if (!platform.active) return;
+      ctx.fillStyle = "white";
+      ctx.fillRect(
+        platform.x - cameraOffsetX,
+        platform.y,
+        platform.width,
+        platform.height
+      );
+    });
+
+    // Player
+    ctx.fillStyle = "cyan";
+    ctx.fillRect(
+      player.x - cameraOffsetX,
+      player.y,
+      player.width,
+      player.height
+    );
+
+    if (player.jetpackActive) {
+      // Draw flames
+      ctx.fillStyle = "orange";
+      ctx.fillRect(
+        player.x - cameraOffsetX + player.width / 4,
+        player.y + player.height,
+        player.width / 2,
+        10
+      );
+    }
+
+    ctx.restore();
+
+    // Bullets
+    bullets.forEach((bullet) => {
+      ctx.fillStyle = "yellow";
+      ctx.fillRect(bullet.x - cameraOffsetX, bullet.y, bullet.width, bullet.height);
+    });
+
+    // Enemies
+    enemies.forEach((enemy) => {
+      ctx.fillStyle = enemy.frozen ? "blue" : "red";
+      ctx.fillRect(
+        enemy.x - cameraOffsetX,
+        enemy.y,
+        enemy.width,
+        enemy.height
+      );
+    });
+  }
+
+  // Update meters
+  function updateMeters() {
+    document.getElementById("lives").textContent = player.lives;
+    document.getElementById("score").textContent = player.score;
+
+    const healthWidth = Math.max(player.health * 200, 0);
+    document.getElementById("lifeFill").style.width = `${healthWidth}px`;
+
+    const minutes = Math.floor(timer / (60 * 60));
+    const seconds = Math.floor((timer % (60 * 60)) / 60);
+    document.getElementById("timer").textContent = `${minutes
+      .toString()
+      .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+  }
+
+  // Game loop
+  function gameLoop() {
+    updateGameState();
+    checkCollisions();
+    drawGame();
+    requestAnimationFrame(gameLoop);
+  }
+
+  // Event listeners
+  window.addEventListener("keydown", (e) => {
+    keys[e.key] = true;
+    if (e.key === " " && keys[" "]) shoot();
+    if (e.key === "ArrowUp" && player.jumpsRemaining > 0) {
+      if (player.jumpsRemaining === 1) {
+        player.jetpackActive = true;
+        player.jetpackTime = maxJetpackTime;
+      }
+      player.velocityY = -10;
+      player.jumpsRemaining--;
+    }
+  });
+  window.addEventListener("keyup", (e) => (keys[e.key] = false));
+
+  // Move player
+  setInterval(() => {
+    if (keys["ArrowRight"]) player.x += player.speed;
+    if (keys["ArrowLeft"]) player.x -= player.speed;
+  }, 16);
+
+  // Initialize game
+  createInitialPlatforms();
+  resetPlayer();
+  gameLoop();
+</script>
+</body>
+</html>
