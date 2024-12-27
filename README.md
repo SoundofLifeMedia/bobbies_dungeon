@@ -3,7 +3,7 @@
 
 ## Bobby the Rabbit
 
-![Play the Game Here] (https://raw.githack.com/SoundofLifeMedia/bobbies_dungeon/refs/heads/main/bobbies_light.html)
+![Play Game Here](https://raw.githack.com/SoundofLifeMedia/bobbies_dungeon/refs/heads/main/bobbies_light.html)
 
 ![Title Screen](https://raw.githubusercontent.com/SoundofLifeMedia/bobbies_dungeon/d011409aa1607cf198543aac8207ff01444637cb/Bobby's%20Dungeon.jpg)
 
