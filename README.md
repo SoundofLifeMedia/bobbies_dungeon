@@ -22,7 +22,7 @@ Title Screen
 
 ![Game Poster](https://raw.githubusercontent.com/SoundofLifeMedia/bobbies_dungeon/refs/heads/main/Play%20Screen.jpg)
 
-Gameplay
+![Gameplay](https://raw.githubusercontent.com/SoundofLifeMedia/bobbies_dungeon/refs/heads/main/Game%20Play.png)
 
 
 How to Play
