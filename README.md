@@ -1,4 +1,4 @@
-# bobbies_dungeon
+# Bobbies Dungeon
 **Bobby's Dungeon**    Navigate a dark, perilous dungeon as Bobby, armed with a flashlight and jetpack! Illuminate hidden paths, freeze and destroy enemies, and avoid deadly lava. Lose health on enemy contact but earn extra lives after 50 and every 100 kills. With dynamic lighting and fiery jetpack action, survive the depths!
 
 ## Bobby the Rabbit
