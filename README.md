@@ -2,10 +2,15 @@ Navigate a dark, perilous dungeon as Bobby, a brave rabbit armed with a flashlig
 
 Features
 Dynamic Lighting: Use Bobby's flashlight to reveal the hidden dangers and platforms in the dungeon.
+
 Jetpack Action: Double-jump to activate a fiery jetpack and explore unreachable areas.
+
 Enemy Encounters: Freeze enemies with your flashlight and destroy them with a second shot.
+
 Health System: Lose 1/3 health on enemy contact and a life after 3 hits.
+
 Lava Hazards: Deadly lava flows below the platforms—don’t fall!
+
 Extra Lives: Gain an extra life after 50 enemy kills, then every 100 kills.
 
 Bobby the Rabbit
