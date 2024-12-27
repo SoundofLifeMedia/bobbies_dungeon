@@ -17,8 +17,10 @@ Click the link below to play Bobby's Dungeon directly in your browser:
 Play Bobby's Dungeon
 
 Screenshots
-Title Screen
+Title Screen 
+![Game Poster](https://raw.githubusercontent.com/SoundofLifeMedia/bobbies_dungeon/refs/heads/main/Bobby's%20Dungeon.jpg)
 
+![Game Poster](https://raw.githubusercontent.com/SoundofLifeMedia/bobbies_dungeon/refs/heads/main/Play%20Screen.jpg)
 
 Gameplay
 
