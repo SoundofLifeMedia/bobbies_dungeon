@@ -24,6 +24,7 @@ Title Screen
 
 ![Gameplay](https://raw.githubusercontent.com/SoundofLifeMedia/bobbies_dungeon/refs/heads/main/Game%20Play.png)
 
+![Play Game](https://raw.githack.com/SoundofLifeMedia/bobbies_dungeon/refs/heads/main/bobbies_light.html)
 
 How to Play
 Navigate the dungeon using your flashlight to uncover hidden dangers and platforms.
