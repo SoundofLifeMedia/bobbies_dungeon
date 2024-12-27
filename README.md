@@ -11,8 +11,7 @@ Extra Lives: Gain an extra life after 50 enemy kills, then every 100 kills.
 Bobby the Rabbit
 Bobby is no ordinary bunny—equipped with a high-tech flashlight and a jetpack, he’s ready to take on the dark dungeon’s challenges.
 
-Play Now
-Click the link below to play Bobby's Dungeon directly in your browser:
+Play Now (https://raw.githack.com/SoundofLifeMedia/bobbies_dungeon/refs/heads/main/bobbies_light.html)
 
 Play Bobby's Dungeon
 
@@ -23,8 +22,6 @@ Title Screen
 ![Game Poster](https://raw.githubusercontent.com/SoundofLifeMedia/bobbies_dungeon/refs/heads/main/Play%20Screen.jpg)
 
 ![Gameplay](https://raw.githubusercontent.com/SoundofLifeMedia/bobbies_dungeon/refs/heads/main/Game%20Play.png)
-
-![Play Game](https://raw.githack.com/SoundofLifeMedia/bobbies_dungeon/refs/heads/main/bobbies_light.html)
 
 How to Play
 Navigate the dungeon using your flashlight to uncover hidden dangers and platforms.
