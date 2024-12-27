@@ -1,4 +1,3 @@
-## Bobby's Dungeon
 Navigate a dark, perilous dungeon as Bobby, a brave rabbit armed with a flashlight and jetpack! Illuminate hidden paths, freeze and destroy enemies, and avoid deadly lava. Lose health on enemy contact, but earn extra lives after 50 kills and every 100 kills thereafter. With dynamic lighting and fiery jetpack action, can you survive the depths?
 
 Features
