@@ -3,6 +3,6 @@
 
 ## screenshots
 
-![Title Screen](https://raw.githubusercontent.com/SoundofLifeMedia/bobbies_dungeon/refs/heads/main/Bobby's%20Dungeon.jpg)
+![Title Screen](https://raw.githubusercontent.com/SoundofLifeMedia/bobbies_dungeon/d011409aa1607cf198543aac8207ff01444637cb/Bobby's%20Dungeon.jpg)
 
-![Play Screen]()
+![Play Screen](https://raw.githubusercontent.com/SoundofLifeMedia/bobbies_dungeon/refs/heads/main/Play%20Screen.jpg)
